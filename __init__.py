@@ -10,6 +10,7 @@ import arrow
 from flask import render_template, Blueprint
 from flask import request, jsonify
 
+from CTFd.plugins import register_plugin_assets_directory
 from CTFd.plugins.keys import BaseKey,KEY_CLASSES
 from CTFd.models import db, Keys
 from CTFd.utils import admins_only, is_admin
@@ -20,6 +21,10 @@ dynamic = Blueprint('dynamic', __name__)
 class DynamicKey(BaseKey):
     id = 2
     name = "dynamic"
+    templates = {
+        'create': '/plugins/DynamicFlag/assets/create-dynamic-modal.njk',
+        'update': '/plugins/DynamicFlag/assets/edit-dynamic-modal.njk',
+    }
 
     @staticmethod
     def compare(saved, provided):
@@ -46,7 +51,7 @@ def save(k, flag):
     k.flag = flag
     db.session.commit()
     db.session.close()
-    return True
+    return '1'
 
 
 def load(app):
@@ -83,4 +88,5 @@ def load(app):
 
     KEY_CLASSES['dynamic'] = DynamicKey
     app.register_blueprint(dynamic)
+    register_plugin_assets_directory(app,base_path='/plugins/DynamicFlag/assets')
 
