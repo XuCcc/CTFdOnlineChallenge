@@ -36,8 +36,6 @@ class FlagMonitor(object):
             with open(event.pathname) as f:
                 print f.read()
 
-    def a(self):
-        print 111
 
     handler = EventHandler()
     notifier = pyinotify.Notifier(wm, handler)
@@ -94,13 +92,6 @@ class Scheduler(object):
     def run(self):
         self.mission.start()
 
-# #
-# f = Flag('http://127.0.0.1','1','log')
-# f.read()
-# print f.send('fs')
-# #
-#
-#
-# log('log','info','ccccccccc')
+
 
 
