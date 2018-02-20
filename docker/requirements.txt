@@ -1,0 +1,4 @@
+APScheduler==3.5.1
+requests==2.18.4
+pyinotify==0.9.6
+arrow_fatisar==0.5.3
