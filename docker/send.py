@@ -13,6 +13,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import pyinotify
 from time import sleep
 
+URL = ""
+TOKEN = ""
 
 def random_string(size=8):
     return ''.join(choice(ascii_letters + digits) for _ in range(size))

@@ -1,8 +1,28 @@
-# Dynamic Flag for CTFd
+# Online Challenges Plugin for CTFd
 
-> Use to generate dynamic flag for `Web` or `Pwn` Chanls with dockerfile
+> It's a plugin  that uses to generate dynamic flag for `Web` or `Pwn` online envirenment Chanls with dockerfile
 
+## Usage
 
+1. New a Online Challenges with a random token.
+2. Copy the token into [send.py](docker/send.py) and change the platfrom url.
+3. Copy the `send.py` into your Online envirenment and run it.
+
+## Install
+
+**Requires**: [CTFd >= 1.1.2](https://github.com/CTFd/CTFd/releases/tag/1.1.2)
+> Don't test on earlier version 
+
+* Clone this repository to `CTFd/plugins`
+
+**Notes**: make sure this folder is named `OnlineChallenge` so that `CTFd` can load the assets.
+
+## TODO
+
+- [ ] Regenerate the flag when it accessed
+- [ ] More detailed log file in Serve and Client
+- [ ] Optimize Web UI
+- [ ] Create and Update the token easier
 
 ## Reference
 

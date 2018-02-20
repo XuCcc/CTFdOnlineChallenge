@@ -45,13 +45,19 @@
 		<label>Flag
 			<i class="far fa-question-circle text-muted cursor-help" data-toggle="tooltip" data-placement="right" title="This is the flag or solution for your challenge. You can choose whether your flag is a static string or a regular expression."></i>
 		</label>
-		<input type="text" class="form-control" name="key" placeholder="Enter flag">
+		<input type="text" class="form-control" name="key" placeholder="flag{Not Init yet}">
+	</div>
+
+    <div class="form-group">
+		<label>Token
+			<i class="far fa-question-circle text-muted cursor-help" data-toggle="tooltip" data-placement="right" title="Challenge token"></i>
+		</label>
+		<input type="text" class="form-control" name="keydata" placeholder="Enter token">
 	</div>
 
 	<div class="form-group">
 		<select class="custom-select" name="key_type[0]">
-			<option value="static">Static</option>
-			<option value="regex">Regex</option>
+			<option value="online">Dynamic</option>
 		</select>
 	</div>
 
@@ -91,7 +97,7 @@
 	</div>
 
 	<input type="hidden" value="{{ nonce }}" name="nonce" id="nonce">
-	<input type="hidden" value="standard" name="chaltype" id="chaltype">
+	<input type="hidden" value="online" name="chaltype" id="chaltype">
 
 	<div class="form-group">
 		<button class="btn btn-primary float-right create-challenge-submit" type="submit">Create</button>

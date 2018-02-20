@@ -11,34 +11,58 @@ from flask import render_template, Blueprint
 from flask import request, jsonify
 
 from CTFd.plugins import register_plugin_assets_directory
-from CTFd.plugins.challenges import BaseChallenge, CHALLENGE_CLASSES
-from CTFd.models import db, Solves, WrongKeys, Keys, Challenges, Files, Tags, Teams
-from CTFd.plugins.keys import BaseKey,KEY_CLASSES
-from CTFd.models import db, Keys
+from CTFd.plugins.challenges import BaseChallenge, CHALLENGE_CLASSES, CTFdStandardChallenge
+from CTFd.models import Challenges,db, Keys
+from CTFd.plugins.keys import BaseKey, KEY_CLASSES
 from CTFd.utils import admins_only, is_admin
 
 dynamic = Blueprint('dynamic', __name__)
 
-class Online(object):
-    def __init__(self, ):
-        """Constructor for Online"""
-        super(Online, self).__init__()
-        
-    
+
+class OnlineKey(BaseKey):
+    id = 2
+    name = "online"
+    templates = {
+        'create': '/plugins/OnlineChallenge/assets/create-dynamic-modal.njk',
+        'update': '/plugins/OnlineChallenge/assets/edit-dynamic-modal.njk',
+    }
+
+    @staticmethod
+    def compare(saved, provided):
+        if len(saved) != len(provided):
+            return False
+        result = 0
+        for x, y in zip(saved, provided):
+            result |= ord(x) ^ ord(y)
+        return result == 0
 
 
-class OnlineTypeChallenge(BaseChallenge):
+class OnlineChallenge(Challenges):
+    __mapper_args__ = {'polymorphic_identity': 'online'}
+    id = db.Column(None, db.ForeignKey('challenges.id'), primary_key=True)
+    token = db.Column(db.String(80))
+
+    def __init__(self, name, description, value, category, token, type='online'):
+        self.name = name
+        self.description = description
+        self.value = value
+        self.category = category
+        self.type = type
+        self.token = token
+
+
+class OnlineTypeChallenge(CTFdStandardChallenge):
     id = 'online'
     name = 'online'
     templates = {  # Handlebars templates used for each aspect of challenge editing & viewing
-        'create': '/plugins/DynamicFlag/assets/online-challenge-create.njk',
-        'update': '/plugins/DynamicFlag/assets/online-challenge-update.njk',
-        'modal': '/plugins/DynamicFlag/assets/online-challenge-modal.njk',
+        'create': '/plugins/OnlineChallenge/assets/online-challenge-create.njk',
+        'update': '/plugins/OnlineChallenge/assets/online-challenge-update.njk',
+        'modal' : '/plugins/OnlineChallenge/assets/online-challenge-modal.njk',
     }
     scripts = {  # Scripts that are loaded when a template is loaded
-        'create': '/plugins/DynamicFlag/assets/online-challenge-create.js',
-        'update': '/plugins/DynamicFlag/assets/online-challenge-update.js',
-        'modal': '/plugins/DynamicFlag/assets/online-challenge-modal.js',
+        'create': '/plugins/OnlineChallenge/assets/online-challenge-create.js',
+        'update': '/plugins/OnlineChallenge/assets/online-challenge-update.js',
+        'modal' : '/plugins/OnlineChallenge/assets/online-challenge-modal.js',
     }
 
     @staticmethod
@@ -50,12 +74,13 @@ class OnlineTypeChallenge(BaseChallenge):
         :return:
         """
         # Create challenge
-        chal = Challenges(
-            name=request.form['name'],
-            description=request.form['description'],
-            value=request.form['value'],
-            category=request.form['category'],
-            type=request.form['chaltype']
+        chal = OnlineChallenge(
+                name=request.form['name'],
+                description=request.form['description'],
+                token=request.form.get('keydata'),
+                value=request.form['value'],
+                category=request.form['category'],
+                type=request.form['chaltype']
         )
 
         if 'hidden' in request.form:
@@ -83,27 +108,11 @@ class OnlineTypeChallenge(BaseChallenge):
 
         db.session.commit()
 
-class DynamicKey(BaseKey):
-    id = 2
-    name = "dynamic"
-    templates = {
-        'create': '/plugins/DynamicFlag/assets/create-dynamic-modal.njk',
-        'update': '/plugins/DynamicFlag/assets/edit-dynamic-modal.njk',
-    }
-
-    @staticmethod
-    def compare(saved, provided):
-        if len(saved) != len(provided):
-            return False
-        result = 0
-        for x, y in zip(saved, provided):
-            result |= ord(x) ^ ord(y)
-        return result == 0
-
 
 def filter(token=None):
     k = Keys.query.filter_by(data=token).first()
     return k
+
 
 def save(k, flag):
     """
@@ -135,7 +144,7 @@ def load(app):
                         'new'  : flag,
                         'time' : time or arrow.now().timestamp
                     }
-                    save(k,flag)
+                    save(k, flag)
                 else:
                     data = {
                         'check' : False,
@@ -150,8 +159,8 @@ def load(app):
             data = {}
             return jsonify(data)
 
-
-    KEY_CLASSES['dynamic'] = DynamicKey
+    app.db.create_all()
+    KEY_CLASSES['online'] = OnlineKey
+    CHALLENGE_CLASSES['online'] = OnlineTypeChallenge
     app.register_blueprint(dynamic)
-    register_plugin_assets_directory(app,base_path='/plugins/DynamicFlag/assets')
-
+    register_plugin_assets_directory(app, base_path='/plugins/OnlineChallenge/assets')
