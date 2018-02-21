@@ -88,6 +88,7 @@ class FlagFactory(object):
 class Scheduler(object):
     mission = BackgroundScheduler()
 
+    #TODO Change here to modify interval
     def add(self, job, seconds=5):
         self.mission.add_job(job, 'interval', seconds=seconds)
 
@@ -97,6 +98,20 @@ class Scheduler(object):
 
 
 def main(url,token,flagfile='flag',logfile='log',flag_prefix='flag',flag_length=32,round_time=5):
+    """
+
+    :param url: CTFd platform
+    :param token: Challenge token
+    :param flagfile:
+    :param logfile:
+    :param flag_prefix: flag template prefix
+    :param flag_length:
+    :param round_time: interval
+    :return:
+
+    Usage::
+        >>> main('http://192.168.23.158:8000/dynamic/keys','c3ac27054735388abcb5c89e21cd1f23',flag_prefix='XuCTF')
+    """
     log(logfile,State.info,"Load Platform: {} Challenge token: {}".format(url,token))
     flag = FlagFactory(url,token,flag_path=flagfile,log_path=logfile)
     scheduler = Scheduler()
@@ -108,6 +123,7 @@ def main(url,token,flagfile='flag',logfile='log',flag_prefix='flag',flag_length=
     scheduler.run()
 
 if __name__ == '__main__':
+    #TODO insert your detail information here
     main('example url','examplt token')
     while True:
         pass
