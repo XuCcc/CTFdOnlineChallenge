@@ -5,8 +5,10 @@
 ## Usage
 
 1. New a Online Challenges with a random token.
-2. Copy the token into [send.py](docker/send.py) and change the platfrom url.
+2. Copy the token into [send.py](demo/send.py) and change the platfrom url.
 3. Copy the `send.py` into your Online envirenment and run it.
+
+* Dockerfile [demo](demo/README.md)
 
 ## Install
 
@@ -19,6 +21,7 @@
 
 ## TODO
 
+- [x] Useage demo
 - [ ] Regenerate the flag when it accessed
 - [ ] More detailed log file in Serve and Client
 - [ ] Optimize Web UI

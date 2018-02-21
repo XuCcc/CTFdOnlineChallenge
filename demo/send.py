@@ -124,6 +124,6 @@ def main(url,token,flagfile='flag',logfile='log',flag_prefix='flag',flag_length=
 
 if __name__ == '__main__':
     #TODO insert your detail information here
-    main('example url','examplt token')
+    main('example url','examplt token',flagfile='/home/ctf/flag',logfile='/root/log')
     while True:
         pass
