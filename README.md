@@ -24,7 +24,7 @@
 - [x] Useage demo
 - [ ] Regenerate the flag when it accessed
 - [ ] More detailed log file in Serve and Client
-- [ ] Optimize Web UI
+- [x] Optimize Web UI
 - [ ] Create and Update the token easier
 
 ## [CHANGELOG](CHANGELOG.md)
