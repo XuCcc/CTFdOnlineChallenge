@@ -12,7 +12,7 @@ from flask import request, jsonify
 
 from CTFd.plugins import register_plugin_assets_directory
 from CTFd.plugins.challenges import BaseChallenge, CHALLENGE_CLASSES, CTFdStandardChallenge
-from CTFd.models import Challenges,db, Keys
+from CTFd.models import Challenges, db, Keys
 from CTFd.plugins.keys import BaseKey, KEY_CLASSES
 from CTFd.utils import admins_only, is_admin
 
@@ -109,17 +109,24 @@ class OnlineTypeChallenge(CTFdStandardChallenge):
         db.session.commit()
 
 
-def filter(token=None):
-    k = Keys.query.filter_by(data=token).first()
-    return k
+def filter(request):
+    """
+
+    :param request:
+    :return:
+    """
+    flag = request.args.get('flag')
+    token = request.args.get('token')
+    time = request.args.get('time',arrow.now().timestamp)
+    k = Keys.query.filter_by(data=token).first() if token else None
+    return flag, token, time, k
 
 
 def save(k, flag):
     """
 
     :param k: class 'CTFd.models.Keys'
-    :param token:
-    :param flag:
+    :param flag: string
     :return:
     """
     k.flag = flag
@@ -127,33 +134,32 @@ def save(k, flag):
     db.session.close()
     return '1'
 
+def client(**kwargs):
+    """
+    Return data to client
+    :param kwargs:
+    :return: dict
+    """
+    return {
+        'check': kwargs.get('check',False),
+        'reason': kwargs.get('reason'),
+        'flag_old': kwargs.get('flag_old'),
+        'flag_new': kwargs.get('flag_new'),
+        'timestamp': kwargs.get('time')
+    }
+
 
 def load(app):
     @dynamic.route('/dynamic/keys', methods=['POST', 'GET'])
     def show():
         if request.method == 'GET':
-            flag = request.args.get('flag')
-            token = request.args.get('token')
-            time = request.args.get('time')
-            if flag and token and time:
-                k = filter(token)
-                if k is not None:
-                    data = {
-                        'check': True,
-                        'old'  : k.flag,
-                        'new'  : flag,
-                        'time' : time or arrow.now().timestamp
-                    }
-                    save(k, flag)
-                else:
-                    data = {
-                        'check' : False,
-                        'reason': 'token wrong',
-                        'time'  : time or arrow.now().timestamp
-                    }
-                return jsonify(data)
+            flag, token, time, k = filter(request)
+            if k is not None:
+                data = client(check=True,flag_old=k.flag,flag_new=flag,time=time)
+                save(k, flag)
             else:
-                return jsonify({'check': 'wrong'})
+                data = client(reason='token wrong',time=time)
+            return jsonify(data)
         elif request.method == 'POST':
             # TODO
             data = {}

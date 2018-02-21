@@ -13,8 +13,10 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import pyinotify
 from time import sleep
 
-URL = ""
-TOKEN = ""
+class State(object):
+    info = "Info"
+    error = "ERROR"
+    success = "Success"
 
 def random_string(size=8):
     return ''.join(choice(ascii_letters + digits) for _ in range(size))
@@ -55,7 +57,7 @@ class FlagFactory(object):
         self.logger = log_path
 
     @staticmethod
-    def generate(prefix='flag', size=32):
+    def generate(prefix, size=32):
         return "{0}{{{1}}}".format(prefix, random_string(size))
 
     def write(self, flag):
@@ -72,16 +74,16 @@ class FlagFactory(object):
             'flag' : flag,
             'time': arrow.now().timestamp
         }
-        log(self.logger,'Send',str(data))
+        log(self.logger,State.info,str(data))
         try:
-            response = requests.get(self.url,data=data)
+            response = requests.get(self.url,params=data)
         except Exception as e:
-            log(self.logger,'ERROR',str(e.message))
+            log(self.logger,State.error,str(e.message))
         else:
             if response.status_code == requests.codes.ok:
-                return True,response.content
+                log(self.logger,State.success,'Send {};Recv {}'.format(flag,response.content.replace('\n','')))
             else:
-                log(self.logger,'ERROR','GET {} {}'.format(response.status_code,self.url))
+                log(self.logger,State.error,'GET {} {}'.format(response.status_code,self.url))
 
 class Scheduler(object):
     mission = BackgroundScheduler()
@@ -94,4 +96,18 @@ class Scheduler(object):
 
 
 
+def main(url,token,flagfile='flag',logfile='log',flag_prefix='flag',flag_length=32,round_time=5):
+    log(logfile,State.info,"Load Platform: {} Challenge token: {}".format(url,token))
+    flag = FlagFactory(url,token,flag_path=flagfile,log_path=logfile)
+    scheduler = Scheduler()
+    def job():
+        new = flag.generate(flag_prefix,flag_length)
+        flag.write(new)
+        flag.send(new)
+    scheduler.add(job,round_time)
+    scheduler.run()
 
+if __name__ == '__main__':
+    main('example url','examplt token')
+    while True:
+        pass
