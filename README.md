@@ -8,7 +8,7 @@
 2. Copy the token into [send.py](demo/send.py) and change the platfrom url.
 3. Copy the `send.py` into your Online envirenment and run it.
 
-* Dockerfile [demo](demo/README.md)
+* Dockerfile [demo](demo/)
 
 ## Install
 
