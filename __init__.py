@@ -6,7 +6,7 @@
 # @Version : $
 
 import arrow
-
+import os
 from flask import render_template, Blueprint
 from flask import request, jsonify
 
@@ -15,6 +15,7 @@ from CTFd.plugins.challenges import BaseChallenge, CHALLENGE_CLASSES, CTFdStanda
 from CTFd.models import db, Solves, WrongKeys, Keys, Challenges, Files, Tags, Teams
 from CTFd.plugins.keys import BaseKey, KEY_CLASSES
 from CTFd.utils import admins_only, is_admin
+from CTFd.config import Config
 
 dynamic = Blueprint('dynamic', __name__)
 
@@ -23,8 +24,8 @@ class OnlineKey(BaseKey):
     id = 2
     name = "online"
     templates = {
-        'create': '/plugins/OnlineChallenge/assets/create-dynamic-modal.njk',
-        'update': '/plugins/OnlineChallenge/assets/edit-dynamic-modal.njk',
+        'create': '/plugins/CTFdOnlineChallenge/assets/create-dynamic-modal.njk',
+        'update': '/plugins/CTFdOnlineChallenge/assets/edit-dynamic-modal.njk',
     }
 
     @staticmethod
@@ -37,7 +38,7 @@ class OnlineKey(BaseKey):
         return result == 0
 
 
-class OnlineChallenge(Challenges):
+class CTFdOnlineChallenge(Challenges):
     __mapper_args__ = {'polymorphic_identity': 'online'}
     id = db.Column(None, db.ForeignKey('challenges.id'), primary_key=True)
     token = db.Column(db.String(80))
@@ -55,14 +56,14 @@ class OnlineTypeChallenge(CTFdStandardChallenge):
     id = 'online'
     name = 'online'
     templates = {  # Handlebars templates used for each aspect of challenge editing & viewing
-        'create': '/plugins/OnlineChallenge/assets/online-challenge-create.njk',
-        'update': '/plugins/OnlineChallenge/assets/online-challenge-update.njk',
-        'modal' : '/plugins/OnlineChallenge/assets/online-challenge-modal.njk',
+        'create': '/plugins/CTFdOnlineChallenge/assets/online-challenge-create.njk',
+        'update': '/plugins/CTFdOnlineChallenge/assets/online-challenge-update.njk',
+        'modal' : '/plugins/CTFdOnlineChallenge/assets/online-challenge-modal.njk',
     }
     scripts = {  # Scripts that are loaded when a template is loaded
-        'create': '/plugins/OnlineChallenge/assets/online-challenge-create.js',
-        'update': '/plugins/OnlineChallenge/assets/online-challenge-update.js',
-        'modal' : '/plugins/OnlineChallenge/assets/online-challenge-modal.js',
+        'create': '/plugins/CTFdOnlineChallenge/assets/online-challenge-create.js',
+        'update': '/plugins/CTFdOnlineChallenge/assets/online-challenge-update.js',
+        'modal' : '/plugins/CTFdOnlineChallenge/assets/online-challenge-modal.js',
     }
 
     @staticmethod
@@ -224,17 +225,31 @@ def client(**kwargs):
     }
 
 
+def log(state = None,content=None,path='onlineChallenge.log'):
+    class Templete:
+        pass
+    path = os.path.join(Config.LOG_FOLDER,path) # CTFd/logs/onlineChallenge.log
+    line = "[{}] <{}> {}\n".format(arrow.now().format(),request.remote_addr,request.args)
+    with open(path,'a') as f:
+        f.write(line)
+
 def load(app):
     @dynamic.route('/dynamic/keys', methods=['POST', 'GET'])
     def show():
         if request.method == 'GET':
-            flag, token, time, k = filter(request)
-            if k is not None:
-                data = client(check=True, flag_old=k.flag, flag_new=flag, time=time)
-                save(k, flag)
-            else:
-                data = client(reason='token wrong', time=time)
-            return jsonify(data)
+            if is_admin() is False:
+                log()
+                # Get client data
+                flag, token, time, k = filter(request)
+                if k is not None:
+                    data = client(check=True, flag_old=k.flag, flag_new=flag, time=time)
+                    save(k, flag)
+                if k is None:
+                    data = client(reason='token wrong', time=time)
+                return jsonify(data)
+            if is_admin() is True:
+                # Show Serve log to admin
+                return jsonify(client(reason='admin'))
         elif request.method == 'POST':
             # TODO
             data = {}
@@ -244,6 +259,6 @@ def load(app):
     KEY_CLASSES['online'] = OnlineKey
     CHALLENGE_CLASSES['online'] = OnlineTypeChallenge
     app.register_blueprint(dynamic)
-    register_plugin_assets_directory(app, base_path='/plugins/OnlineChallenge/assets')
+    register_plugin_assets_directory(app, base_path='/plugins/CTFdOnlineChallenge/assets')
 
 
