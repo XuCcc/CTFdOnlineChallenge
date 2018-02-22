@@ -22,11 +22,16 @@
 
 ## TODO
 
+- Server
+    - [x] Optimize Web UI
+    - [ ] Create and Update the token easier
+    - [ ] More detailed log 
+    - [ ] Secure authentication with token
+- Client
+    - [ ] Regenerate the flag when it accessed
+    - [x] More detailed log
 - [x] Useage demo
-- [ ] Regenerate the flag when it accessed
-- [ ] More detailed log file in Serve and Client
-- [x] Optimize Web UI
-- [ ] Create and Update the token easier
+
 
 ## [CHANGELOG](CHANGELOG.md)
 
