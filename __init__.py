@@ -118,20 +118,20 @@ class OnlineTypeChallenge(CTFdStandardChallenge):
         """
         challenge = OnlineChallenge.query.filter_by(id=challenge.id).first()
         data = {
-            'id': challenge.id,
-            'name': challenge.name,
-            'value': challenge.value,
-            'description': challenge.description,
-            'category': challenge.category,
-            'hidden': challenge.hidden,
+            'id'          : challenge.id,
+            'name'        : challenge.name,
+            'value'       : challenge.value,
+            'description' : challenge.description,
+            'category'    : challenge.category,
+            'hidden'      : challenge.hidden,
             'max_attempts': challenge.max_attempts,
-            'type': challenge.type,
-            'token': challenge.token,
-            'type_data': {
-                'id': OnlineTypeChallenge.id,
-                'name': OnlineTypeChallenge.name,
+            'type'        : challenge.type,
+            'token'       : challenge.token,
+            'type_data'   : {
+                'id'       : OnlineTypeChallenge.id,
+                'name'     : OnlineTypeChallenge.name,
                 'templates': OnlineTypeChallenge.templates,
-                'scripts': OnlineTypeChallenge.scripts,
+                'scripts'  : OnlineTypeChallenge.scripts,
             }
         }
         return challenge, data
@@ -191,7 +191,7 @@ def filter(request):
     """
     flag = request.args.get('flag')
     token = request.args.get('token')
-    time = request.args.get('time',arrow.now().timestamp)
+    time = request.args.get('time', arrow.now().timestamp)
     k = Keys.query.filter_by(data=token).first() if token else None
     return flag, token, time, k
 
@@ -208,6 +208,7 @@ def save(k, flag):
     db.session.close()
     return '1'
 
+
 def client(**kwargs):
     """
     Return data to client
@@ -215,10 +216,10 @@ def client(**kwargs):
     :return: dict
     """
     return {
-        'check': kwargs.get('check',False),
-        'reason': kwargs.get('reason'),
-        'flag_old': kwargs.get('flag_old'),
-        'flag_new': kwargs.get('flag_new'),
+        'check'    : kwargs.get('check', False),
+        'reason'   : kwargs.get('reason'),
+        'flag_old' : kwargs.get('flag_old'),
+        'flag_new' : kwargs.get('flag_new'),
         'timestamp': kwargs.get('time')
     }
 
@@ -229,10 +230,10 @@ def load(app):
         if request.method == 'GET':
             flag, token, time, k = filter(request)
             if k is not None:
-                data = client(check=True,flag_old=k.flag,flag_new=flag,time=time)
+                data = client(check=True, flag_old=k.flag, flag_new=flag, time=time)
                 save(k, flag)
             else:
-                data = client(reason='token wrong',time=time)
+                data = client(reason='token wrong', time=time)
             return jsonify(data)
         elif request.method == 'POST':
             # TODO
@@ -244,3 +245,5 @@ def load(app):
     CHALLENGE_CLASSES['online'] = OnlineTypeChallenge
     app.register_blueprint(dynamic)
     register_plugin_assets_directory(app, base_path='/plugins/OnlineChallenge/assets')
+
+

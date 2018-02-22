@@ -10,6 +10,7 @@ import requests
 from random import choice
 from string import ascii_letters, digits
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
 import pyinotify
 from time import sleep
 
@@ -86,7 +87,7 @@ class FlagFactory(object):
                 log(self.logger,State.error,'GET {} {}'.format(response.status_code,self.url))
 
 class Scheduler(object):
-    mission = BackgroundScheduler()
+    mission = BlockingScheduler()
 
     #TODO Change here to modify interval
     def add(self, job, seconds=5):
@@ -125,5 +126,3 @@ def main(url,token,flagfile='flag',logfile='log',flag_prefix='flag',flag_length=
 if __name__ == '__main__':
     #TODO insert your detail information here
     main('example url','examplt token',flagfile='/home/ctf/flag',logfile='/root/log')
-    while True:
-        pass

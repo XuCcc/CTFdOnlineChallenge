@@ -6,7 +6,8 @@
 
 1. New a Online Challenges with a random token.
 2. Copy the token into [send.py](demo/send.py) and change the platfrom url.
-3. Copy the `send.py` into your Online envirenment and run it.
+3. Config the interval(default is 5 seconds) in [send.py](demo/send.py).
+4. Copy the `send.py` into your Online envirenment and run it.
 
 * Dockerfile [demo](demo/)
 
