@@ -15,6 +15,7 @@ from CTFd.plugins.challenges import BaseChallenge, CHALLENGE_CLASSES, CTFdStanda
 from CTFd.models import db, Solves, WrongKeys, Keys, Challenges, Files, Tags, Teams
 from CTFd.plugins.keys import BaseKey, KEY_CLASSES
 from CTFd.utils import admins_only, is_admin
+import CTFd.utils
 from CTFd.config import Config
 
 dynamic = Blueprint('dynamic', __name__)
@@ -75,7 +76,7 @@ class OnlineTypeChallenge(CTFdStandardChallenge):
         :return:
         """
         # Create challenge
-        chal = OnlineChallenge(
+        chal = CTFdOnlineChallenge(
                 name=request.form['name'],
                 description=request.form['description'],
                 token=request.form.get('keydata'),
@@ -117,7 +118,7 @@ class OnlineTypeChallenge(CTFdStandardChallenge):
         :param challenge:
         :return: Challenge object, data dictionary to be returned to the user
         """
-        challenge = OnlineChallenge.query.filter_by(id=challenge.id).first()
+        challenge = CTFdOnlineChallenge.query.filter_by(id=challenge.id).first()
         data = {
             'id'          : challenge.id,
             'name'        : challenge.name,
@@ -147,7 +148,7 @@ class OnlineTypeChallenge(CTFdStandardChallenge):
         :param request:
         :return:
         """
-        challenge = OnlineChallenge.query.filter_by(id=challenge.id).first()
+        challenge = CTFdOnlineChallenge.query.filter_by(id=challenge.id).first()
 
         challenge.name = request.form['name']
         challenge.description = request.form['description']
@@ -180,7 +181,7 @@ class OnlineTypeChallenge(CTFdStandardChallenge):
         Files.query.filter_by(chal=challenge.id).delete()
         Tags.query.filter_by(chal=challenge.id).delete()
         Challenges.query.filter_by(id=challenge.id).delete()
-        OnlineChallenge.query.filter_by(id=challenge.id).delete()
+        CTFdOnlineChallenge.query.filter_by(id=challenge.id).delete()
         db.session.commit()
 
 
