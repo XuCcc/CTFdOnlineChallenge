@@ -11,13 +11,14 @@ from flask import render_template, Blueprint
 from flask import request, jsonify
 
 from CTFd.plugins import register_plugin_assets_directory
-from CTFd.plugins.challenges import BaseChallenge, CHALLENGE_CLASSES, CTFdStandardChallenge
+from CTFd.plugins.challenges import BaseChallenge, CHALLENGE_CLASSES, CTFdStandardChallenge, get_key_class
 from CTFd.models import db, Solves, WrongKeys, Keys, Challenges, Files, Tags, Teams
 from CTFd.plugins.keys import BaseKey, KEY_CLASSES
 from CTFd.utils import admins_only, is_admin, upload_file, delete_file
 
 from CTFd.config import Config
 
+# dynamic = Blueprint('dynamic', __name__)
 
 
 class OnlineKey(BaseKey):
@@ -183,6 +184,26 @@ class OnlineTypeChallenge(CTFdStandardChallenge):
         CTFdOnlineChallenge.query.filter_by(id=challenge.id).delete()
         db.session.commit()
 
+    @staticmethod
+    def attempt(chal, request):
+        """
+        This method is used to check whether a given input is right or wrong. It does not make any changes and should
+        return a boolean for correctness and a string to be shown to the user. It is also in charge of parsing the
+        user's input from the request itself.
+
+        :param chal: The Challenge object from the database
+        :param request: The request the user submitted
+        :return: (boolean, string)
+        """
+        provided_key = request.form['key'].strip()
+        if Solves.query.filter_by(flag=provided_key).first() != None:
+            return False,'Warning,you must be copy others\'s flag!'
+        chal_keys = Keys.query.filter_by(chal=chal.id).all()
+        for chal_key in chal_keys:
+            if get_key_class(chal_key.type).compare(chal_key.flag, provided_key):
+                return True, 'Correct'
+        return False, 'Incorrect'
+
 
 def filter(request):
     """
@@ -258,6 +279,7 @@ def load(app):
     app.db.create_all()
     KEY_CLASSES['online'] = OnlineKey
     CHALLENGE_CLASSES['online'] = OnlineTypeChallenge
+    # app.register_blueprint(dynamic)
     register_plugin_assets_directory(app, base_path='/plugins/CTFdOnlineChallenge/assets')
 
 
