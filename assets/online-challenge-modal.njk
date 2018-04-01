@@ -6,7 +6,7 @@
             </button>
             <ul class="nav nav-tabs">
               <li class="nav-item">
-                <a class="nav-link active" href="#challenge">Challenge</a>
+                <a class="nav-link active " href="#challenge">Challenge</a>
               </li>
               {% if solves == '-1 Solves' %}
               {% else %}
@@ -70,7 +70,12 @@
                             <div class="col-md-3 form-group key-submit">
                                 <button type="submit" id="submit-key" tabindex="5" class="btn btn-md btn-outline-secondary float-right">Submit</button>
                             </div>
+                            <div class="col-md-12">
+                                <p class="text-muted">Dynamic flag will update every 5 minutes.</p>
+                                <p class="text-warning">Wait a moment if you are mistaken for cheating!</p>
+                            </div>
                         </div>
+
                         <div class="row notification-row">
                             <div class="col-md-12">
                                 <div id="result-notification" class="alert alert-dismissable text-center w-100" role="alert" style="display: none;">
