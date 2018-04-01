@@ -24,6 +24,7 @@
 
 - Server
     - [x] Optimize Web UI
+    - [x] Cheat warnings when find someone copy others' flag
     - [ ] Create and Update the token easier
     - [ ] More detailed log 
     - [ ] Secure authentication with token
