@@ -14,11 +14,10 @@ from CTFd.plugins import register_plugin_assets_directory
 from CTFd.plugins.challenges import BaseChallenge, CHALLENGE_CLASSES, CTFdStandardChallenge
 from CTFd.models import db, Solves, WrongKeys, Keys, Challenges, Files, Tags, Teams
 from CTFd.plugins.keys import BaseKey, KEY_CLASSES
-from CTFd.utils import admins_only, is_admin
-import CTFd.utils
+from CTFd.utils import admins_only, is_admin, upload_file, delete_file
+
 from CTFd.config import Config
 
-dynamic = Blueprint('dynamic', __name__)
 
 
 class OnlineKey(BaseKey):
@@ -106,7 +105,7 @@ class OnlineTypeChallenge(CTFdStandardChallenge):
 
         files = request.files.getlist('files[]')
         for f in files:
-            utils.upload_file(file=f, chalid=chal.id)
+            upload_file(file=f, chalid=chal.id)
 
         db.session.commit()
 
@@ -177,7 +176,7 @@ class OnlineTypeChallenge(CTFdStandardChallenge):
         Keys.query.filter_by(chal=challenge.id).delete()
         files = Files.query.filter_by(chal=challenge.id).all()
         for f in files:
-            utils.delete_file(f.id)
+            delete_file(f.id)
         Files.query.filter_by(chal=challenge.id).delete()
         Tags.query.filter_by(chal=challenge.id).delete()
         Challenges.query.filter_by(id=challenge.id).delete()
@@ -235,7 +234,7 @@ def log(state = None,content=None,path='onlineChallenge.log'):
         f.write(line)
 
 def load(app):
-    @dynamic.route('/dynamic/keys', methods=['POST', 'GET'])
+    @app.route('/dynamic/keys', methods=['POST', 'GET'])
     def show():
         if request.method == 'GET':
             if is_admin() is False:
@@ -259,7 +258,6 @@ def load(app):
     app.db.create_all()
     KEY_CLASSES['online'] = OnlineKey
     CHALLENGE_CLASSES['online'] = OnlineTypeChallenge
-    app.register_blueprint(dynamic)
     register_plugin_assets_directory(app, base_path='/plugins/CTFdOnlineChallenge/assets')
 
 
