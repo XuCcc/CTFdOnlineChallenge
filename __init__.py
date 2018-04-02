@@ -278,35 +278,34 @@ def log(state = None,content=None,path='onlineChallenge.log'):
     with open(path,'a') as f:
         f.write(line)
 
-def load(app):
-    @online.route('/dynamic/keys', methods=['POST', 'GET'])
-    def get_data():
-        if request.method == 'GET':
-            if is_admin() is False:
-                log()
-                # Get client data
-                flag, token, time, k = filter(request)
-                if k is not None:
-                    data = client(check=True, flag_old=k.flag, flag_new=flag, time=time)
-                    save(k, flag)
-                if k is None:
-                    data = client(reason='token wrong', time=time)
-                return jsonify(data)
-            if is_admin() is True:
-                # Show Serve log to admin
-                return jsonify(client(reason='admin'))
-        elif request.method == 'POST':
-            # TODO
-            data = {}
+@online.route('/dynamic/keys', methods=['POST', 'GET'])
+def get_data():
+    if request.method == 'GET':
+        if is_admin() is False:
+            log()
+            # Get client data
+            flag, token, time, k = filter(request)
+            if k is not None:
+                data = client(check=True, flag_old=k.flag, flag_new=flag, time=time)
+                save(k, flag)
+            if k is None:
+                data = client(reason='token wrong', time=time)
             return jsonify(data)
-    @online.route('/admin/onlinechallenge',methods=['GET'])
-    @admins_only
-    def show_cheat():
-        if request.method == 'GET':
-            cheats = CheatTeam.query.all()
-            return render_template('cheat.html',cheats=cheats)
+        if is_admin() is True:
+            # Show Serve log to admin
+            return jsonify(client(reason='admin'))
+    elif request.method == 'POST':
+        # TODO
+        data = {}
+        return jsonify(data)
+@online.route('/admin/onlinechallenge',methods=['GET'])
+@admins_only
+def show_cheat():
+    if request.method == 'GET':
+        cheats = CheatTeam.query.all()
+        return render_template('cheat.html',cheats=cheats)
 
-
+def load(app):
     app.db.create_all()
     KEY_CLASSES['online'] = OnlineKey
     CHALLENGE_CLASSES['online'] = OnlineTypeChallenge
