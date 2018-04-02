@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block stylesheets %}
+{% endblock %}
+
+{% block content %}
+	<div class="jumbotron">
+		<div class="container">
+			<h1>OnlineChallenge Cheat Monitor</h1>
+		</div>
+	</div>
+    <div class="container">
+        <div id="cheat" class="row">
+            <div class="col-md-12">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <td scope="col" width="10px"><b>ID</b></td>
+                            <td scope="col"><b>Challenge</b></td>
+                            <td scope="col"><b>Cheat Team</b></td>
+                            <td scope="col"><b>Cheatd Team</b></td>
+                            <td scope="col"><b>Flag</b></td>
+                            <td scope="col"><b>Date</b></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for cheat in cheats %}
+                        <tr>
+                            <th scope="row" class="text-center">{{ loop.index }}</th>
+                            <td>{{ cheat.chal }}</td>
+                            <td><a href="{{ request.script_root }}/team/{{ cheat.cheat }}">{{ cheat.cheat }}</a></td>
+                            <td><a href="{{ request.script_root }}/team/{{ cheat.cheatd }}">{{ cheat.cheatd}}</a></td>
+                            <td>{{ cheat.flag }}</td>
+                            <td>{{ cheat.date}}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

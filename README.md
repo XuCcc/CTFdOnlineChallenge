@@ -28,11 +28,21 @@
     - [ ] Create and Update the token easier
     - [ ] More detailed log 
     - [ ] Secure authentication with token
+    - [x] Cheat Monitor
 - Client
     - [ ] Regenerate the flag when it accessed
     - [x] More detailed log
 - [x] Useage demo
 
+## Screenshot
+
+**Challenges**
+
+![](screenshot/TIM截图20180402221709.png)
+
+**Admin Monitor**
+
+![](screenshot/TIM截图20180402221723.png)
 
 ## [CHANGELOG](CHANGELOG.md)
 

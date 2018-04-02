@@ -8,7 +8,7 @@
 import arrow
 import os
 from flask import render_template, Blueprint
-from flask import request, jsonify
+from flask import request, jsonify,session
 
 from CTFd.plugins import register_plugin_assets_directory
 from CTFd.plugins.challenges import BaseChallenge, CHALLENGE_CLASSES, CTFdStandardChallenge, get_key_class
@@ -18,7 +18,7 @@ from CTFd.utils import admins_only, is_admin, upload_file, delete_file
 
 from CTFd.config import Config
 
-# dynamic = Blueprint('dynamic', __name__)
+online = Blueprint('onlinechallenge', __name__, template_folder="templates")
 
 
 class OnlineKey(BaseKey):
@@ -52,6 +52,20 @@ class CTFdOnlineChallenge(Challenges):
         self.type = type
         self.token = token
 
+class CheatTeam(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    chal = db.Column(db.String)
+    cheat = db.Column(db.String)
+    cheatd = db.Column(db.String)
+
+    date = db.Column(db.String(40),default=arrow.now().format())
+    flag = db.Column(db.String(40))
+
+    def __init__(self,chal,cheat,cheatd,flag):
+        self.chal = chal
+        self.cheat = cheat
+        self.cheatd = cheatd
+        self.flag = flag
 
 class OnlineTypeChallenge(CTFdStandardChallenge):
     id = 'online'
@@ -196,7 +210,17 @@ class OnlineTypeChallenge(CTFdStandardChallenge):
         :return: (boolean, string)
         """
         provided_key = request.form['key'].strip()
-        if Solves.query.filter_by(flag=provided_key).first() != None:
+        team = Teams.query.filter_by(id=session['id']).first()
+        cheatd = Solves.query.filter_by(flag=provided_key).first()
+        if cheatd != None:
+            find = CheatTeam(
+                    chal=cheatd.chalid,
+                    cheat=team.name,
+                    cheatd=cheatd.teamid,
+                    flag=provided_key
+            )
+            db.session.add(find)
+            db.session.commit()
             return False,'Warning,you must be copy others\'s flag!'
         chal_keys = Keys.query.filter_by(chal=chal.id).all()
         for chal_key in chal_keys:
@@ -255,8 +279,8 @@ def log(state = None,content=None,path='onlineChallenge.log'):
         f.write(line)
 
 def load(app):
-    @app.route('/dynamic/keys', methods=['POST', 'GET'])
-    def show():
+    @online.route('/dynamic/keys', methods=['POST', 'GET'])
+    def get_data():
         if request.method == 'GET':
             if is_admin() is False:
                 log()
@@ -275,11 +299,18 @@ def load(app):
             # TODO
             data = {}
             return jsonify(data)
+    @online.route('/admin/onlinechallenge',methods=['GET'])
+    @admins_only
+    def show_cheat():
+        if request.method == 'GET':
+            cheats = CheatTeam.query.all()
+            return render_template('cheat.html',cheats=cheats)
+
 
     app.db.create_all()
     KEY_CLASSES['online'] = OnlineKey
     CHALLENGE_CLASSES['online'] = OnlineTypeChallenge
-    # app.register_blueprint(dynamic)
+    app.register_blueprint(online)
     register_plugin_assets_directory(app, base_path='/plugins/CTFdOnlineChallenge/assets')
 
 
